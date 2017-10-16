@@ -8,12 +8,12 @@ import java.util.HashSet;
 import java.util.Set;
 import java.lang.Math;
 
-public class player02Tournament implements ContestSubmission {
+public class player02TournamentIsland implements ContestSubmission {
 	Random rand;
 	ContestEvaluation evaluation_;
     private int evaluations_limit_;
 
-	public player02Tournament()
+	public player02TournamentIsland()
 	{
 		rand = new Random();
 	}
@@ -47,22 +47,6 @@ public class player02Tournament implements ContestSubmission {
         }
     }
 
-    private int[] getRanking(double[] array){
-
-    	int[] ranking = new int[array.length];
-
-    	for(int k = 0; k < array.length; k++){
-        		ranking[k] = 0;
-        		for(int l = 0; k < array.length; k++){
-        			if(array[k] < array[l]){
-        				ranking[k] += 1;	
-    			}
-    		}
-    	}
-
-    	return ranking;
-    }
-
     private int[] getSample(int populationSize, int sampleSize){
 
 		int[] sample = new int[sampleSize];
@@ -80,20 +64,18 @@ public class player02Tournament implements ContestSubmission {
 
 	public void run(){
 
-		// parameters
-		// int populationSize = 100; // mu
-		// int tournamentSize = 50;
-		// int tournamentWinners = 2;
-		// int selectionRate = 7;
+        // Choose optimal parameters
+        int populationSize = 20;
+        int tournamentSize = 10; 
+        int tournamentWinners = 2;
+        double selectionRate = 4;
+        double crossOverProb = 1;
+        Boolean crossOverRand = true;
 
-		// random parameters;
-        Random randParameters = new Random();
-		int populationSize = 1 + randParameters.nextInt(100);// min 1?, max ?
-		int tournamentSize = 1 + randParameters.nextInt(populationSize); // min 1, max populationSize
-		int tournamentWinners = 1 + randParameters.nextInt(tournamentSize); // min 1, max tournamentSize
-		double selectionRate = 1 + 9 * randParameters.nextDouble(); // rate = mu/lambda, lecture notes: good around 3-7.
-        double crossOverProb = randParameters.nextDouble();
-        Boolean crossOverRand = randParameters.nextBoolean();
+        // Island parameters
+        int exchangeFreq = 10; 
+        int exchangeSize = 2;
+        int communitySize = 3;
 
 		// Compute other variables
 		int parentSizeMin = (int) selectionRate*populationSize;
@@ -104,41 +86,47 @@ public class player02Tournament implements ContestSubmission {
 		int mu = populationSize; 
 		int childrenSize = parentSize; // for crossover
 
-		// System.out.println("populationSize: " + populationSize);
-		// System.out.println("tournamentSize: " + tournamentSize);
-		// System.out.println("tournamentWinners: " + tournamentWinners);
-		// System.out.println("selectionRate: " + selectionRate);
-		// System.out.println("parentSize: " + parentSize);
-        // System.out.println("crossOverProb: " + crossOverProb);
-        // System.out.println("crossOverProb: " + crossOverProb);   
-        System.out.println(populationSize + "," + tournamentSize + "," + tournamentWinners + "," + "," + parentSize + "," + crossOverProb + "," + crossOverRand);
+        System.out.println(populationSize + "," + tournamentSize + "," + tournamentWinners + "," + selectionRate + "," + parentSize + "," + crossOverProb + "," + crossOverRand);
+        System.out.println(exchangeFreq + "," + exchangeSize + " " + communitySize);
 
 		// Run your algorithm here
         int evals = 0;
 
-        // init population
-        double[][] population = new double[populationSize][10];
-		double[][] parents = new double[parentSize][10];
+        // init population/community
+        double[][][] community = new double [communitySize][populationSize][10];
+    	double[][] parents = new double[parentSize][10];
         double[][] children = new double[childrenSize][10];
 		double[][] survivors = new double[mu][10];
 
-        double[] populationFitness = new double[populationSize];
+        double[][] communityFitness = new double[communitySize][populationSize];
         double[] childrenFitness = new double[parentSize];
 		double[] survivorsFitness = new double[mu];     
 
-        // random initiation and first evaluation:
-        for(int i = 0; i < populationSize; i++){
-        	for(int j = 0; j < 10; j++){
-        		population[i][j] = -5 + 10*rand.nextDouble();
-        	}
-			populationFitness[i] = 0; // (double) evaluation_.evaluate(population[i]);	
-			// evals++;
-		}
+        // random initiation
+        for(int p = 0; p < communitySize; p++){
+            for(int i = 0; i < populationSize; i++){
+                for(int j = 0; j < 10; j++){
+                    community[p][i][j] = -5 + 10*rand.nextDouble();
+                }
+                communityFitness[p][i] = (double) evaluation_.evaluate(community[p][i]);  
+                evals++;
+            }
+        }
+
+        int communityIndex = 0;
+        int generations = 0;
 
         // calculate fitness
         while(evals + childrenSize <= evaluations_limit_){
-        	// Parent selection
-		   	// Tournament parent selection
+        	
+            System.out.println(generations + " " + evals);
+
+            // Choose population from community
+            double[][] population = community[communityIndex];
+            double[] populationFitness = communityFitness[communityIndex];
+
+            // Parent selection
+            // Tournament parent selection
 	   		int parentCount = 0;
 	   		int rounds = 0;
     		while(rounds*tournamentWinners < parentSize){
@@ -153,7 +141,6 @@ public class player02Tournament implements ContestSubmission {
           			}
       				if(score < tournamentWinners && winnerCount < tournamentWinners){
      					parents[parentCount] = population[can];
-
       					parentCount++;
       					winnerCount++;
           			}
@@ -206,6 +193,53 @@ public class player02Tournament implements ContestSubmission {
     		population = survivors;
     		populationFitness = survivorsFitness;
 			
+            // update community
+            community[communityIndex] = population;
+            communityFitness[communityIndex] = populationFitness;
+            if(communityIndex < communitySize - 1){
+                communityIndex++;
+            } else {
+                communityIndex = 0;
+                generations++;
+            }
+
+            // Exchange between populations
+            if(generations % exchangeFreq == 0 && generations > 0){
+                int[][] departing = new int[communitySize * exchangeSize][2];
+                int departingIndex = 0;
+                // draw departing individuals from each population
+                for(int p = 0; p < communitySize; p++){
+                    int[] departingSample = getSample(populationSize, exchangeSize);
+                    for(int q = 0; q < exchangeSize; q++){
+                        departing[departingIndex][0] = p;
+                        departing[departingIndex][1] = departingSample[q];
+                        departingIndex++;
+                    }
+                }
+                
+                int[][] arriving = departing;
+
+                // shuffle departing individuals
+                for(int i = 0; i < arriving.length; i++){ 
+                    int randomPosition = rand.nextInt(arriving.length);
+
+                    // make sure to shuffle to other populations:
+                    while( arriving[randomPosition][0] == departing[i][0] ){
+                        randomPosition = rand.nextInt(arriving.length);                    
+                    }
+
+                    int[] temp = arriving[i];
+                    arriving[i] = arriving[randomPosition];
+                    arriving[randomPosition] = temp;
+                }
+
+                // replace departing individuals
+                for(int i = 0; i < departing.length; i++){
+                    double[] temp = community[arriving[i][0]][arriving[i][1]];
+                    community[arriving[i][0]][arriving[i][1]] = community[departing[i][0]][departing[i][1]];
+                    community[departing[i][0]][departing[i][1]] = temp;
+                }
+            }
         }
   	}
 }

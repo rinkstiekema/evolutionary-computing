@@ -52,13 +52,14 @@ public class player02Particle implements ContestSubmission
 
 		// Set parameters
         Random randParameters = new Random();
-		double weightCurrent = randParameters.nextInt(5);
-		double weightIndividual = randParameters.nextInt(15);
-		double weightSocial = weightIndividual;
+		double weightCurrent = 0.5 + randParameters.nextDouble();
+		double weightIndividual = 4 * randParameters.nextDouble();
+		double weightSocial = 4 * randParameters.nextDouble();
 		int populationSize = randParameters.nextInt(250);
-		double velocityMax = randParameters.nextInt(5);
-		String boundMethod = "mirror"; // mirror or loop
-		double friction = randParameters.nextInt(1); ; // 0 < friction < 1
+		double velocityMax = 10*randParameters.nextDouble();
+		Boolean boundMethodBool = randParameters.nextBoolean(); // true: mirror, else: loop
+		String boundMethod = boundMethodBool ? "mirror" : "loop"; 
+		double friction = randParameters.nextDouble(); ; // 0 < friction < 1
 
 		// Init population arrays
 		double[][] population = new double[populationSize][10];
