@@ -87,6 +87,31 @@ public class player2 implements ContestSubmission
 		return bestAgent;
 	}
 
+    private double distance(double[] x1, double[] x2){
+
+        double sum = 0;
+        for(int j=0; j<10; j++){
+            sum += Math.pow((x1[j]-x2[j]), 2);
+        }
+
+        return sum;
+    }
+
+    private double minDistance(double[][] population){
+
+        double minValue = 0;
+
+        for(int i1 = 0; i1 < population.length; i1++){
+            for(int i2 = 0; i2 < population.length; i2++){
+                if(i1 != i2){
+                    minValue += distance(population[i1], population[i2]);
+                }
+            }
+        }
+
+        return minValue;
+    }
+
 	public void SchaffersAlg() {
         //parameters
         double crossoverRate = 0.7;
@@ -101,9 +126,21 @@ public class player2 implements ContestSubmission
         // init population
         double[] fitnessArray = new double[populationSize];
         double[][] population = new double[populationSize][10];
+        
+        double minValue = 0;
+        while(minValue < 150000){
+            for(int i = 0; i < populationSize; i++){
+                for(int j = 0; j < 10; j++){
+                    population[i][j] = 5 - 10 * rand.nextDouble();
+                }
+            }
+            minValue = minDistance(population);
+            System.out.println(minValue);
+        }
+
         for(int i = 0; i < populationSize; i++){
             for(int j = 0; j < 10; j++){
-                population[i][j] = -5 + 10 * rand.nextDouble();
+                population[i][j] = 5 - 10 * rand.nextDouble();
             }
         }
 
@@ -139,6 +176,8 @@ public class player2 implements ContestSubmission
                             newPopulation[i][j] += differentialRate * (population[randomAgents[2 * k + 1]][j] - population[randomAgents[2 * k + 2]][j]);
                             //}
                         }
+                        
+
                     } else {
                         newPopulation[i][j] = population[i][j];
                     }
@@ -180,16 +219,16 @@ public class player2 implements ContestSubmission
 
     public void BentCigarAlg(){
         // parameters
-        double crossoverRate = 0.7;
-        double differentialRate = 0.1;
-        int populationSize = 30;
+        double crossoverRate = 0.73;
+        double differentialRate = 0.45;
+        int populationSize = 20;
         int pertubationSize = 2; // in {1,2,..., populationSize/2 - 1}
         Boolean bestBase = false; // otherwise best
 
         // Island parameters
-        int exchangeFreq = 200;
+        int exchangeFreq = 70;
         int exchangeSize = 1;
-        int communitySize = 5;
+        int communitySize = 2;
 
         // Run your algorithm here
         int evals = 0;
@@ -245,11 +284,15 @@ public class player2 implements ContestSubmission
                                 }
                                 // pertubation vectors
                                 for(int k = 0; k < pertubationSize; k++){
-                                    newPopulation[i][j] += differentialRate * (population[randomAgents[2*k + 1]][j] - population[randomAgents[2*k + 2]][j]);
+                                    //if(fitnessArray[randomAgents[0]] > 9.99){
+                                   //     newPopulation[i][j] += 0.2 * (population[randomAgents[2*k + 1]][j] - population[randomAgents[2*k + 2]][j]);
+                                    // } else {
+                                         newPopulation[i][j] += differentialRate * (population[randomAgents[2*k + 1]][j] - population[randomAgents[2*k + 2]][j]);    
                                 }
+                            
                             } else {
                                 newPopulation[i][j] = population[i][j];
-                            }
+                                }
 
                             newPopulation[i][j] = Math.min(5, Math.max(-5, newPopulation[i][j]));
 
@@ -317,11 +360,10 @@ public class player2 implements ContestSubmission
     }
 
     public void KatsuuraAlg(){
-
+        SchaffersAlg();
     }
 
-	public void run()
-	{
+	public void run(){
         if(evaluationMethod.equals("SchaffersEvaluation")) {
             SchaffersAlg();
         } else if(evaluationMethod.equals("BentCigarFunction")) {
