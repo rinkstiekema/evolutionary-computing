@@ -87,31 +87,6 @@ public class player2 implements ContestSubmission
 		return bestAgent;
 	}
 
-    private double distance(double[] x1, double[] x2){
-
-        double sum = 0;
-        for(int j=0; j<10; j++){
-            sum += Math.pow((x1[j]-x2[j]), 2);
-        }
-
-        return sum;
-    }
-
-    private double minDistance(double[][] population){
-
-        double minValue = 0;
-
-        for(int i1 = 0; i1 < population.length; i1++){
-            for(int i2 = 0; i2 < population.length; i2++){
-                if(i1 != i2){
-                    minValue += distance(population[i1], population[i2]);
-                }
-            }
-        }
-
-        return minValue;
-    }
-
 	public void SchaffersAlg() {
         //parameters
         double crossoverRate = 0.7;
@@ -127,16 +102,12 @@ public class player2 implements ContestSubmission
         double[] fitnessArray = new double[populationSize];
         double[][] population = new double[populationSize][10];
         
-        double minValue = 0;
-        while(minValue < 150000){
-            for(int i = 0; i < populationSize; i++){
-                for(int j = 0; j < 10; j++){
-                    population[i][j] = 5 - 10 * rand.nextDouble();
-                }
+        for(int i = 0; i < populationSize; i++){
+            for(int j = 0; j < 10; j++){
+                population[i][j] = 5 - 10 * rand.nextDouble();
             }
-            minValue = minDistance(population);
-            System.out.println(minValue);
         }
+
 
         for(int i = 0; i < populationSize; i++){
             for(int j = 0; j < 10; j++){
