@@ -168,13 +168,7 @@ public class player2 implements ContestSubmission
                         }
                         // pertubation vectors
                         for(int k = 0; k < pertubationSize; k++) {
-                            /*if (fitnessArray[randomAgents[0]] > 9.8){
-                                newPopulation[i][j] += 0.6 * (population[randomAgents[2 * k + 1]][j] - population[randomAgents[2 * k + 2]][j]);
-                            } if (fitnessArray[randomAgents[0]] > 9.9){
-                                newPopulation[i][j] += 0.7 * (population[randomAgents[2 * k + 1]][j] - population[randomAgents[2 * k + 2]][j]);
-                            } else {*/
                             newPopulation[i][j] += differentialRate * (population[randomAgents[2 * k + 1]][j] - population[randomAgents[2 * k + 2]][j]);
-                            //}
                         }
                         
 
@@ -289,10 +283,7 @@ public class player2 implements ContestSubmission
                                 }
                                 // pertubation vectors
                                 for(int k = 0; k < pertubationSize; k++){
-                                    //if(fitnessArray[randomAgents[0]] > 9.99){
-                                   //     newPopulation[i][j] += 0.2 * (population[randomAgents[2*k + 1]][j] - population[randomAgents[2*k + 2]][j]);
-                                    // } else {
-                                         newPopulation[i][j] += differentialRate * (population[randomAgents[2*k + 1]][j] - population[randomAgents[2*k + 2]][j]);    
+                                    newPopulation[i][j] += differentialRate * (population[randomAgents[2*k + 1]][j] - population[randomAgents[2*k + 2]][j]);
                                 }
                             
                             } else {
