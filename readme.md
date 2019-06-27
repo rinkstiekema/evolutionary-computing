@@ -2,7 +2,7 @@
 
 A project for the course Evolutionary Computing course of master track Big Data Engineering at the VU Amsterdam.
 
-# What can be find in this repository?
+# What can be found in this repository?
 The src folder contains various java files with implementations of different evolutionary algorithms that try to optimize the following 3 functions:
 - Schaffers
 - Bent Cigar
